@@ -60,6 +60,7 @@ Additionally, the Epstein Civil Violence Model captures how agents decide to fol
 
 When viewing our simulation, users would see a bird's eye view of a road system that includes AI vehicles and human vehicles, all interacting with each other. Cars will be spawned in at the "bottom" of the highway and work their way "upwards", this spawning will occur throughout the simulation at every step. Their goal is to make it to the end of the highway system. Our phenomena is displayed by the media component of how these AI cars will interact with one another. AI vehicles have signals between one another that allow them to have vision of one another to prevent collisions. Human-operated vehicles don't have the same signals. We will monitor collision rates between humans and other humans, humans with AI cars, and AI cars with AI cars to observe our phenomena. We will include a visualization, as shown below, to plot this data. Furthermore, we can also look at movement patterns that emerge from these interactions that arise from our phenomena and document these findings. 
 
-<img src="./Team10_ProjectProposal_Diagram.png" width="600">
+<img src="./Team10_ProjectProposal_Diagram.png" width="550">
+<img src="./Team10_ProjectProposal_Graph.png" width="550">
 
 
