@@ -19,9 +19,12 @@ class VehicleAgent(mesa.experimental.cell_space.CellAgent):
         self.empty_neighbors = empty_neighbors
 
     def move(self):
-        if self.model.movement and self.empty_neighbors:
-            new_pos = self.random.choice(self.empty_neighbors)
-            self.move_to(new_pos)
+        # Find empty cells (cells with no other agents)
+        empty_cells = [cell for cell in self.empty_neighbors if not cell.agents]
+
+        if empty_cells:
+            self.move_to(self.random.choice(empty_cells))
+
 
 
 class HumanVehicle(VehicleAgent):
