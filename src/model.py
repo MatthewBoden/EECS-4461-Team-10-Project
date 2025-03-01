@@ -24,8 +24,8 @@ class HighwayV2VModel(mesa.Model):
         self,
         width=7,
         height=70,
-        ai_vision=1,
-        human_vision=0,
+        ai_vision=5,
+        human_vision=2,
         movement=True,
         max_iters=1000,
         seed=None,
@@ -33,6 +33,9 @@ class HighwayV2VModel(mesa.Model):
         super().__init__(seed=seed)
         self.max_iters = max_iters
         self.movement = movement
+
+        self.ai_vision = ai_vision
+        self.human_vision = human_vision
 
         self.grid = mesa.experimental.cell_space.OrthogonalMooreGrid(
             (width, height), capacity=10, torus=False, random=self.random
@@ -66,7 +69,6 @@ class HighwayV2VModel(mesa.Model):
         Advance the model by one step and collect data.
         """
         self.agents.shuffle_do("step")
-        vision = 1
 
         for cell in self.grid.all_cells:
             # Next 3 blocks are for the dynamic spawning of agents, random # and random types per row
@@ -75,20 +77,20 @@ class HighwayV2VModel(mesa.Model):
             if cell.coordinate == (0, 0) and cell.empty:
                 result = random.random() < 0.5
                 if result:
-                    ai_vehicle = AIVehicle(self, vision=vision)
+                    ai_vehicle = AIVehicle(self, vision=self.ai_vision)
                     ai_vehicle.move_to(cell)
                 else:
-                    human_vehicle = HumanVehicle(self, vision=vision)
+                    human_vehicle = HumanVehicle(self, vision=self.human_vision)
                     human_vehicle.move_to(cell) 
 
             # [Mandatory] Spawn of random agent type in middle column
             if cell.coordinate == (6, 0) and cell.empty:
                 result = random.random() < 0.5
                 if result:
-                    ai_vehicle = AIVehicle(self, vision=vision)
+                    ai_vehicle = AIVehicle(self, vision=self.ai_vision)
                     ai_vehicle.move_to(cell)
                 else:
-                    human_vehicle = HumanVehicle(self, vision=vision)
+                    human_vehicle = HumanVehicle(self, vision=self.human_vision)
                     human_vehicle.move_to(cell) 
 
             # [Optional] Spawn of random agent type in middle column
@@ -97,10 +99,10 @@ class HighwayV2VModel(mesa.Model):
                 if cell.coordinate == (3, 0) and cell.empty:
                     result = random.random() < 0.5
                     if result:
-                        ai_vehicle = AIVehicle(self, vision=vision)
+                        ai_vehicle = AIVehicle(self, vision=self.ai_vision)
                         ai_vehicle.move_to(cell)
                     else:
-                        human_vehicle = HumanVehicle(self, vision=vision)
+                        human_vehicle = HumanVehicle(self, vision=self.human_vision)
                         human_vehicle.move_to(cell) 
 
             # Removal of agents when they reach the end of the grid 
