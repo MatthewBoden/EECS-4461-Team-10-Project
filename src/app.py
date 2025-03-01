@@ -32,12 +32,21 @@ def post_process(ax):
     ax.set_yticks([])
     ax.get_figure().set_size_inches(15, 15)
 
+def customize_plot(ax):
+    ax.set_title("Vehicle Accidents Over Time")
+    ax.set_xlabel("Number of Steps")
+    ax.set_ylabel("Number of Accidents")
+    ax.grid(True)
+    ax.legend(loc="upper left")
+
 collision_chart = make_plot_component(
     {
         "AI-AI Collisions": "#AA4A44",
         "Human-Human Collisions": "#808080",
         "AI-Human Collisions": "#000000"     
     },
+    post_process=customize_plot,
+    backend="matplotlib"
 )
 
 model_params = {
