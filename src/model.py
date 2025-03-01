@@ -38,6 +38,21 @@ class HighwayV2VModel(mesa.Model):
             (width, height), capacity=10, torus=False, random=self.random
         )
 
+        self.ai_ai_collisions = 0
+        self.human_human_collisions = 0
+        self.ai_human_collisions = 0
+
+
+        model_reporters = {
+            "AI-AI Collisions": lambda m: m.ai_ai_collisions,
+            "Human-Human Collisions": lambda m: m.human_human_collisions,
+            "AI-Human Collisions": lambda m: m.ai_human_collisions,
+        }
+
+        self.datacollector = mesa.DataCollector(model_reporters=model_reporters)
+        self.datacollector.collect(self)
+
+
         # need to create initial vehicle to initialize system
         vehicle = AIVehicle(self, vision=ai_vision)
         for cell in self.grid.all_cells:
@@ -97,6 +112,18 @@ class HighwayV2VModel(mesa.Model):
                 for agent in cell.agents:
                     print(agent)
                 print(cell.coordinate)
+
+                agent1 = cell.agents[0]
+                agent2 = cell.agents[1]
+
+                if isinstance(agent1, AIVehicle) and isinstance(agent2, AIVehicle):
+                    self.ai_ai_collisions += 1
+                elif isinstance(agent1, HumanVehicle) and isinstance(agent2, HumanVehicle):
+                    self.human_human_collisions += 1
+                else:
+                    self.ai_human_collisions += 1
+                
+                self.datacollector.collect(self)
 
 
         if self.steps > self.max_iters:
