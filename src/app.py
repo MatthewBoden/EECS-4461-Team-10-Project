@@ -33,7 +33,7 @@ def post_process(ax):
     ax.get_figure().set_size_inches(15, 15)
 
 def customize_plot(ax):
-    ax.set_title("Vehicle Accidents Over Time")
+    ax.set_title("Accidents Over Time: AI-AI Vs Human-Human Vs AI-Human")
     ax.set_xlabel("Number of Steps")
     ax.set_ylabel("Number of Accidents")
     ax.grid(True)
