@@ -24,8 +24,8 @@ class HighwayV2VModel(mesa.Model):
         self,
         width=7,
         height=70,
-        ai_vision=1,
-        human_vision=0,
+        ai_vision=3,
+        human_vision=1,
         movement=True,
         max_iters=1000,
         seed=None,
@@ -33,6 +33,9 @@ class HighwayV2VModel(mesa.Model):
         super().__init__(seed=seed)
         self.max_iters = max_iters
         self.movement = movement
+        self.ai_vision = ai_vision
+        self.human_vision = human_vision
+        self.height = height
 
         self.grid = mesa.experimental.cell_space.OrthogonalMooreGrid(
             (width, height), capacity=10, torus=False, random=self.random
@@ -66,7 +69,6 @@ class HighwayV2VModel(mesa.Model):
         Advance the model by one step and collect data.
         """
         self.agents.shuffle_do("step")
-        vision = 1
 
         for cell in self.grid.all_cells:
             # Next 3 blocks are for the dynamic spawning of agents, random # and random types per row
@@ -75,20 +77,20 @@ class HighwayV2VModel(mesa.Model):
             if cell.coordinate == (0, 0) and cell.empty:
                 result = random.random() < 0.5
                 if result:
-                    ai_vehicle = AIVehicle(self, vision=vision)
+                    ai_vehicle = AIVehicle(self, vision=self.ai_vision)
                     ai_vehicle.move_to(cell)
                 else:
-                    human_vehicle = HumanVehicle(self, vision=vision)
+                    human_vehicle = HumanVehicle(self, vision=self.human_vision)
                     human_vehicle.move_to(cell) 
 
             # [Mandatory] Spawn of random agent type in middle column
             if cell.coordinate == (6, 0) and cell.empty:
                 result = random.random() < 0.5
                 if result:
-                    ai_vehicle = AIVehicle(self, vision=vision)
+                    ai_vehicle = AIVehicle(self, vision=self.ai_vision)
                     ai_vehicle.move_to(cell)
                 else:
-                    human_vehicle = HumanVehicle(self, vision=vision)
+                    human_vehicle = HumanVehicle(self, vision=self.human_vision)
                     human_vehicle.move_to(cell) 
 
             # [Optional] Spawn of random agent type in middle column
@@ -97,22 +99,17 @@ class HighwayV2VModel(mesa.Model):
                 if cell.coordinate == (3, 0) and cell.empty:
                     result = random.random() < 0.5
                     if result:
-                        ai_vehicle = AIVehicle(self, vision=vision)
+                        ai_vehicle = AIVehicle(self, vision=self.ai_vision)
                         ai_vehicle.move_to(cell)
                     else:
-                        human_vehicle = HumanVehicle(self, vision=vision)
+                        human_vehicle = HumanVehicle(self, vision=self.human_vision)
                         human_vehicle.move_to(cell) 
 
             # Removal of agents when they reach the end of the grid 
-            if (cell.coordinate[1] == 69) and cell.empty == False:
+            if (cell.coordinate[1] == self.height - 1) and cell.empty == False:
                 cell.remove_agent(cell.agents[0])
             
             if (len(cell.agents) == 2):
-                print("Collision!")
-                for agent in cell.agents:
-                    print(agent)
-                print(cell.coordinate)
-
                 agent1 = cell.agents[0]
                 agent2 = cell.agents[1]
 
@@ -124,7 +121,27 @@ class HighwayV2VModel(mesa.Model):
                     self.ai_human_collisions += 1
                 
                 self.datacollector.collect(self)
+            
+            if len(cell.agents) == 3:
+                agent1 = cell.agents[0]
+                agent2 = cell.agents[1]
+                agent3 = cell.agents[2]
 
+                ai_count = sum(isinstance(agent, AIVehicle) for agent in (agent1, agent2, agent3))
+                human_count = 3 - ai_count
+                
+                if ai_count == 3:
+                    self.ai_ai_collisions += 2
+                elif human_count == 3:
+                    self.human_human_collisions += 2
+                elif ai_count == 2:
+                    self.ai_ai_collisions += 1
+                    self.ai_human_collisions += 1
+                elif human_count == 2:
+                    self.human_human_collisions += 1
+                    self.ai_human_collisions += 1    
+
+                self.datacollector.collect(self)
 
         if self.steps > self.max_iters:
             self.running = False

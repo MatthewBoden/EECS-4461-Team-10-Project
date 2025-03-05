@@ -14,14 +14,9 @@ class VehicleAgent(mesa.experimental.cell_space.CellAgent):
 
         empty_neighbors = []
         for c in self.neighborhood:
-            if c.coordinate[1] > self.cell.coordinate[1]: # checks y value to move forward
+            if c.coordinate[1] - self.cell.coordinate[1] == 1 and (abs(c.coordinate[0] - self.cell.coordinate[0]) == 1 or c.coordinate[0] - self.cell.coordinate[0] == 0): # checks y value to move forward
                 empty_neighbors.append(c)
         self.empty_neighbors = empty_neighbors
-
-    def move(self):
-        if self.model.movement and self.empty_neighbors:
-            new_pos = self.random.choice(self.empty_neighbors)
-            self.move_to(new_pos)
 
 
 class HumanVehicle(VehicleAgent):
@@ -45,6 +40,11 @@ class HumanVehicle(VehicleAgent):
         self.neighborhood = []
         self.neighbors = []
         self.empty_neighbors = []
+
+    def move(self):
+        if self.model.movement and self.empty_neighbors:
+            new_pos = self.random.choice(self.empty_neighbors)
+            self.move_to(new_pos)
 
     def step(self):
         """
@@ -75,6 +75,27 @@ class AIVehicle(VehicleAgent):
         self.neighborhood = []
         self.neighbors = []
         self.empty_neighbors = []
+
+    def move(self):
+        # V2V.
+        if self.model.movement and self.empty_neighbors:
+            for neighbor in self.neighbors:
+                cur_x = self.cell.coordinate[0]
+                cur_y = self.cell.coordinate[1]
+                neighbor_x = neighbor.cell.coordinate[0]
+                neighbor_y = neighbor.cell.coordinate[1]
+                if (cur_y == neighbor_y or neighbor_y - cur_y == 1) and neighbor.__class__ == AIVehicle: # agents in same row or above row
+                    if neighbor_x > cur_x: # if AI neighbor is to the right of us
+                        new_pos = self.random.choice(self.empty_neighbors[0:2]) # move left or stay in the same lane
+                        self.move_to(new_pos)
+                        return
+                    elif neighbor_x < cur_x: # if AI neighbor is to the left of us
+                        new_pos = self.random.choice(self.empty_neighbors[1:3]) # move right or stay in the same lane
+                        self.move_to(new_pos)
+                        return
+
+            new_pos = self.random.choice(self.empty_neighbors)
+            self.move_to(new_pos)
 
     def step(self):
         """
