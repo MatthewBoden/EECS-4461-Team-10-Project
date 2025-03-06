@@ -23,45 +23,72 @@ class HighwayV2VModel(mesa.Model):
     def __init__(
         self,
         width=7,
-        height=70,
+        height=60,
         ai_vision=3,
         human_vision=1,
+        left_sway_coefficient=0.5,
+        right_sway_coefficient=0.5,
+        ai_spawn_chance=0.5,
         movement=True,
-        max_iters=1000,
+        max_iters=10000,
         seed=None,
     ):
         super().__init__(seed=seed)
+
+        # Model Params
         self.max_iters = max_iters
         self.movement = movement
         self.ai_vision = ai_vision
         self.human_vision = human_vision
         self.height = height
+        self.width = width
+        self.left_sway_coefficient = left_sway_coefficient
+        self.right_sway_coefficient = right_sway_coefficient
+        self.ai_spawn_chance = ai_spawn_chance
 
         self.grid = mesa.experimental.cell_space.OrthogonalMooreGrid(
             (width, height), capacity=10, torus=False, random=self.random
         )
 
+        # Data Elements
+        self.steps = 0
+
+        self.human_count = 1
+        self.ai_count = 1
+
         self.ai_ai_collisions = 0
         self.human_human_collisions = 0
         self.ai_human_collisions = 0
 
+        self.middle_ai_time_in_polar_lanes = 0
+        self.middle_human_time_in_polar_lanes = 0
+
+        self.middle_ai_polar_rate = 0
+        self.middle_human_polar_rate = 0
 
         model_reporters = {
             "AI-AI Collisions": lambda m: m.ai_ai_collisions,
             "Human-Human Collisions": lambda m: m.human_human_collisions,
             "AI-Human Collisions": lambda m: m.ai_human_collisions,
+            "AI Agents": lambda m: m.ai_count,
+            "Human Agents": lambda m: m.human_count,
+            "AI Agents in Polar Lanes": lambda m: m.middle_ai_polar_rate,
+            "Human Agents in Polar Lanes": lambda m: m.middle_human_polar_rate
         }
 
         self.datacollector = mesa.DataCollector(model_reporters=model_reporters)
         self.datacollector.collect(self)
 
+        # need to create initial vehicles when initializing system
+        ai_vehicle = AIVehicle(self, vision=ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
+        human_vehicle = HumanVehicle(self, vision=human_vision, is_middle=True)
 
-        # need to create initial vehicle to initialize system
-        vehicle = AIVehicle(self, vision=ai_vision)
         for cell in self.grid.all_cells:
-            if cell.coordinate == (3, 0):
-                vehicle.move_to(cell)
-
+            if cell.coordinate == (2, 0):
+                ai_vehicle.move_to(cell)
+            if cell.coordinate == (4, 0):
+                human_vehicle.move_to(cell)
+        
         self.running = True
     
     def step(self):
@@ -73,42 +100,52 @@ class HighwayV2VModel(mesa.Model):
         for cell in self.grid.all_cells:
             # Next 3 blocks are for the dynamic spawning of agents, random # and random types per row
 
-            # [Mandatory] Spawn of random agent type in middle column
-            if cell.coordinate == (0, 0) and cell.empty:
-                result = random.random() < 0.5
-                if result:
-                    ai_vehicle = AIVehicle(self, vision=self.ai_vision)
-                    ai_vehicle.move_to(cell)
-                else:
-                    human_vehicle = HumanVehicle(self, vision=self.human_vision)
-                    human_vehicle.move_to(cell) 
-
-            # [Mandatory] Spawn of random agent type in middle column
-            if cell.coordinate == (6, 0) and cell.empty:
-                result = random.random() < 0.5
-                if result:
-                    ai_vehicle = AIVehicle(self, vision=self.ai_vision)
-                    ai_vehicle.move_to(cell)
-                else:
-                    human_vehicle = HumanVehicle(self, vision=self.human_vision)
-                    human_vehicle.move_to(cell) 
-
-            # [Optional] Spawn of random agent type in middle column
-            third_spawn_result = random.random() < 0.5
-            if third_spawn_result:
-                if cell.coordinate == (3, 0) and cell.empty:
+            # [Optional] Spawn of random agent type in far left column
+            first_spawn_result = random.random() < 0.5
+            if first_spawn_result:
+                if cell.coordinate == (0, 0) and cell.empty:
                     result = random.random() < 0.5
                     if result:
-                        ai_vehicle = AIVehicle(self, vision=self.ai_vision)
+                        ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
                         ai_vehicle.move_to(cell)
+                        self.ai_count += 1
                     else:
-                        human_vehicle = HumanVehicle(self, vision=self.human_vision)
+                        human_vehicle = HumanVehicle(self, vision=self.human_vision, is_middle=False)
                         human_vehicle.move_to(cell) 
+                        self.human_count += 1
+
+            # [Optional] Spawn of random agent in far right column
+            second_spawn_result = random.random() < 0.5
+            if second_spawn_result:
+                if cell.coordinate == (6, 0) and cell.empty:
+                    result = random.random() < 0.5
+                    if result:
+                        ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
+                        ai_vehicle.move_to(cell)
+                        self.ai_count += 1
+                    else:
+                        human_vehicle = HumanVehicle(self, vision=self.human_vision, is_middle=False)
+                        human_vehicle.move_to(cell) 
+                        self.human_count += 1
+                
+            # [Mandatory] Spawn of random agent in middle column
+            if cell.coordinate == (3, 0) and cell.empty:
+                result = random.random() < 0.5
+                if result:
+                    ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=True, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
+                    ai_vehicle.move_to(cell)
+                    self.ai_count += 1
+                    
+                else:
+                    human_vehicle = HumanVehicle(self, vision=self.human_vision, is_middle=True)
+                    human_vehicle.move_to(cell) 
+                    self.human_count += 1
 
             # Removal of agents when they reach the end of the grid 
             if (cell.coordinate[1] == self.height - 1) and cell.empty == False:
                 cell.remove_agent(cell.agents[0])
             
+            # collision between two agents
             if (len(cell.agents) == 2):
                 agent1 = cell.agents[0]
                 agent2 = cell.agents[1]
@@ -119,31 +156,42 @@ class HighwayV2VModel(mesa.Model):
                     self.human_human_collisions += 1
                 else:
                     self.ai_human_collisions += 1
-                
-                self.datacollector.collect(self)
-            
+                    
+            # collision between three agents
             if len(cell.agents) == 3:
                 agent1 = cell.agents[0]
                 agent2 = cell.agents[1]
                 agent3 = cell.agents[2]
 
-                ai_count = sum(isinstance(agent, AIVehicle) for agent in (agent1, agent2, agent3))
-                human_count = 3 - ai_count
+                temp_ai_count = sum(isinstance(agent, AIVehicle) for agent in (agent1, agent2, agent3))
+                temp_human_count = 3 - temp_ai_count
                 
-                if ai_count == 3:
+                if temp_ai_count == 3:
                     self.ai_ai_collisions += 2
-                elif human_count == 3:
+                elif temp_human_count == 3:
                     self.human_human_collisions += 2
-                elif ai_count == 2:
+                elif temp_ai_count == 2:
                     self.ai_ai_collisions += 1
                     self.ai_human_collisions += 1
-                elif human_count == 2:
+                elif temp_human_count == 2:
                     self.human_human_collisions += 1
                     self.ai_human_collisions += 1    
 
-                self.datacollector.collect(self)
+            # check agents that made it to end lanes
+            if cell.coordinate[0] == 0 or cell.coordinate[0] == self.width-1: 
+                if not cell.is_empty:
+                    for agent in cell.agents:
+                        if agent.__class__ == AIVehicle and agent.is_middle:
+                            self.middle_ai_time_in_polar_lanes += 1
+                        if agent.__class__ == HumanVehicle and agent.is_middle:
+                            self.middle_human_time_in_polar_lanes += 1
+
+        self.steps += 1
+
+        self.middle_ai_polar_rate = self.middle_ai_time_in_polar_lanes / self.steps
+        self.middle_human_polar_rate = self.middle_human_time_in_polar_lanes / self.steps
+
+        self.datacollector.collect(self)
 
         if self.steps > self.max_iters:
             self.running = False
-
-

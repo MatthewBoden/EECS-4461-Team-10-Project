@@ -1,4 +1,5 @@
 import mesa
+import random
 
 class VehicleAgent(mesa.experimental.cell_space.CellAgent):
     def update_neighbors(self):
@@ -27,7 +28,7 @@ class HumanVehicle(VehicleAgent):
         vision: number of cells in each direction that agent can inspect
     """
 
-    def __init__(self, model, vision):
+    def __init__(self, model, vision, is_middle):
         """
         Create a new HumanVehicle.
         Args:
@@ -40,6 +41,7 @@ class HumanVehicle(VehicleAgent):
         self.neighborhood = []
         self.neighbors = []
         self.empty_neighbors = []
+        self.is_middle = is_middle
 
     def move(self):
         if self.model.movement and self.empty_neighbors:
@@ -62,7 +64,7 @@ class AIVehicle(VehicleAgent):
         vision: number of cells in each direction that AI is able to inspect
     """
 
-    def __init__(self, model, vision):
+    def __init__(self, model, vision, is_middle, left_sway_coefficient, right_sway_coefficient):
         """
         Create a new AIVehicle.
         Args:
@@ -75,22 +77,35 @@ class AIVehicle(VehicleAgent):
         self.neighborhood = []
         self.neighbors = []
         self.empty_neighbors = []
+        self.is_middle = is_middle
+        self.left_sway_coefficient = left_sway_coefficient
+        self.right_sway_coefficient = right_sway_coefficient
 
     def move(self):
-        # V2V.
+        # V2V Logic
         if self.model.movement and self.empty_neighbors:
             for neighbor in self.neighbors:
                 cur_x = self.cell.coordinate[0]
                 cur_y = self.cell.coordinate[1]
                 neighbor_x = neighbor.cell.coordinate[0]
                 neighbor_y = neighbor.cell.coordinate[1]
-                if (cur_y == neighbor_y or neighbor_y - cur_y == 1) and neighbor.__class__ == AIVehicle: # agents in same row or above row
+                if (cur_y == neighbor_y or neighbor_y - cur_y == 1) and neighbor.__class__ == AIVehicle: # agents in nearby rows
                     if neighbor_x > cur_x: # if AI neighbor is to the right of us
-                        new_pos = self.random.choice(self.empty_neighbors[0:2]) # move left or stay in the same lane
+                        result = random.random() < self.left_sway_coefficient # the parameter to configure how often the V2V logic dictates to move left
+                        if result:
+                            new_pos = self.empty_neighbors[0] # change lanes to the left
+                        elif len(self.empty_neighbors) == 2:
+                            new_pos = self.empty_neighbors[0] # stay in same lane because no space to the left
+                        else:
+                            new_pos = self.empty_neighbors[1] # stay in the same lane
                         self.move_to(new_pos)
                         return
                     elif neighbor_x < cur_x: # if AI neighbor is to the left of us
-                        new_pos = self.random.choice(self.empty_neighbors[1:3]) # move right or stay in the same lane
+                        result = random.random() < self.right_sway_coefficient # the parameter to configure how often the V2V logic dictates to move right
+                        if result and len(self.empty_neighbors) == 3:
+                            new_pos = self.empty_neighbors[2] # change lanes to the right if not on edge
+                        else:
+                            new_pos = self.empty_neighbors[1] # stay in the same lane
                         self.move_to(new_pos)
                         return
 
