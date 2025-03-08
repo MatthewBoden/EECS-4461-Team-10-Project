@@ -9,7 +9,6 @@ Using **Agent-Based Modeling (ABM)**, our prototype simulates AI-to-AI, AI-to-hu
 
 The prototype features:
 - **Realistic AI vehicle interactions** via omnidirectional radio signals
-- **Machine learning optimization** to improve V2V communication
 - **Simulation of thousands of vehicles** interacting in a complex system
 - **Collision tracking and behavioral analysis**
 
@@ -27,10 +26,7 @@ Ensure you have the latest version of Python (>= 3.11) installed. You can downlo
     - Run the following commands in your terminal:
 
     ```
-    pip install -U --pre mesa[all]
-    pip uninstall -y ipyvue ipyvuetify
-    pip install ipyvue==1.11.2
-    pip install ipyvuetify==1.10.0
+    pip install -r requirements.txt
     ```
 
 3. Run the Application
