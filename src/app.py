@@ -3,12 +3,14 @@ from agent import (
     HumanVehicle,
 )
 from model import HighwayV2VModel
+from mesa.visualization.utils import update_counter
 from mesa.visualization import (
     Slider,
     SolaraViz,
     make_plot_component,
     make_space_component,
 )
+import solara
 
 def portrayal(agent):
     if agent is None:
@@ -75,14 +77,64 @@ polar_lane_average = make_plot_component(
     backend="matplotlib"
 )
 
-agent_count_chart = make_plot_component(
-    {
-        "AI Agents": "#AA4A44",
-        "Human Agents": "#808080",
-    },
-    post_process=customize_plot_3,
-    backend="matplotlib"
-)
+@solara.component
+def agent_counter(model):
+    update_counter.get()
+    
+    with solara.Div(style={"margin-top": "50px", "margin-left": "-250px"}): 
+        with solara.Row(justify="center", style={"margin-bottom": "20px"}):
+            solara.Text("AGENT COUNTS", style={
+                "font-size": "36px",
+                "font-weight": "bold",
+                "color": "#2C3E50",
+                "text-align": "center",
+                "letter-spacing": "2px"
+            })
+            
+        with solara.Row(
+            justify="center",
+            gap="20px",
+            style={"padding": "20px"} 
+        ):
+            with solara.Card("AI Agents", style={
+                "background": "#AA4A44", 
+                "color": "white", 
+                "min-width": "150px",
+                "padding": "15px",
+                "text-align": "center"
+            }):
+                solara.Text(str(model.ai_count), style={
+                    "font-size": "32px", 
+                    "text-align": "center",
+                    "font-weight": "bold"
+                })
+            
+            with solara.Card("Human Agents", style={
+                "background": "#808080", 
+                "color": "white", 
+                "min-width": "150px",
+                "padding": "15px",
+                "text-align": "center"
+            }):
+                solara.Text(str(model.human_count), style={
+                    "font-size": "32px", 
+                    "text-align": "center",
+                    "font-weight": "bold"
+                })
+            
+            with solara.Card("Total Agents", style={
+                "background": "#5B9BD5",
+                "color": "white", 
+                "min-width": "150px",
+                "padding": "15px",
+                "text-align": "center",
+                "box-shadow": "0 4px 6px rgba(0, 0, 0, 0.1)"
+            }):
+                solara.Text(str(model.human_count + model.ai_count), style={
+                    "font-size": "32px", 
+                    "text-align": "center",
+                    "font-weight": "bold"
+                })
 
 space_fill = make_plot_component(
     {},
@@ -107,7 +159,14 @@ space_component = make_space_component(
 
 page = SolaraViz(
     epstein_model,
-    components=[space_component, agent_count_chart, space_fill, polar_lane_average, space_fill, collision_chart],
+    components=[
+        space_component,
+        agent_counter,
+        space_fill,
+        polar_lane_average,
+        space_fill,
+        collision_chart
+    ],
     model_params=model_params,
     name="Highway V2V Model",
 )
