@@ -30,5 +30,5 @@ Ensure you have the latest version of Python (>= 3.11) installed. You can downlo
     ```
 
 3. Run the Application
-    - Navigate to the an example directly like `boid` or `epstein`
+    - Navigate to the directly `src`
     - Start the application `solara run app.py`
