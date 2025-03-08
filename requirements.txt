@@ -1,0 +1,4 @@
+mesa[all]
+ipyvue==1.11.2
+ipyvuetify==1.10.0
+solara
