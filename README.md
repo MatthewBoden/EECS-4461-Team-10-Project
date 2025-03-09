@@ -30,5 +30,6 @@ Ensure you have the latest version of Python (>= 3.11) installed. You can downlo
     ```
 
 3. Run the Application
-    - Navigate to the directly `src`
-    - Start the application `solara run app.py`
+    - Run the following commands in your terminal:
+    - 'cd src'
+    - 'solara run app.py'
