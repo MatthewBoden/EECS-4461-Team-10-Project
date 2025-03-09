@@ -28,7 +28,6 @@ class HighwayV2VModel(mesa.Model):
         human_vision=1,
         left_sway_coefficient=0.5,
         right_sway_coefficient=0.5,
-        ai_spawn_chance=0.5,
         movement=True,
         max_iters=10000,
         seed=None,
@@ -44,7 +43,6 @@ class HighwayV2VModel(mesa.Model):
         self.width = width
         self.left_sway_coefficient = left_sway_coefficient
         self.right_sway_coefficient = right_sway_coefficient
-        self.ai_spawn_chance = ai_spawn_chance
 
         self.grid = mesa.experimental.cell_space.OrthogonalMooreGrid(
             (width, height), capacity=10, torus=False, random=self.random
@@ -84,9 +82,9 @@ class HighwayV2VModel(mesa.Model):
         human_vehicle = HumanVehicle(self, vision=human_vision, is_middle=True)
 
         for cell in self.grid.all_cells:
-            if cell.coordinate == (2, 0):
+            if cell.coordinate == (1, 0):
                 ai_vehicle.move_to(cell)
-            if cell.coordinate == (4, 0):
+            if cell.coordinate == (5, 0):
                 human_vehicle.move_to(cell)
         
         self.running = True
