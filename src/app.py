@@ -81,7 +81,7 @@ polar_lane_average = make_plot_component(
 def agent_counter(model):
     update_counter.get()
     
-    with solara.Div(style={"margin-top": "50px", "margin-left": "-250px"}): 
+    with solara.Div(style={"margin-top": "50px", "margin-left": "-110px"}): 
         with solara.Row(justify="center", style={"margin-bottom": "20px"}):
             solara.Text("AGENT COUNTS", style={
                 "font-size": "36px",
