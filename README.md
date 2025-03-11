@@ -52,8 +52,6 @@ Ensure you have the latest version of Python (>= 3.11) installed. You can downlo
     - Run the following commands in your terminal:
     ```
     cd src
-    ```
-    ```
     solara run app.py
     ```
 
