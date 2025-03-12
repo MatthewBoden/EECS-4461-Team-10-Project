@@ -37,18 +37,13 @@ Next Steps: We will investigate V2V parameters, particularly sway coefficients, 
 ## §B. How to run the simulation
 Ensure you have the latest version of Python (>= 3.11) installed. You can download it from the official Python website.
 
-1. Create a Virtual Environment
-    - Open VSCode and press Ctrl+Shift+P
-    - Search for "Python: Create Virtual Environment" and follow the prompts
-    - Search for "Python: Select Interpreter" and select the interpreter you installed
-
-2. Install Dependencies
+1. Install Dependencies
     - Run the following commands in your terminal:
     ```
     pip install -r requirements.txt
     ```
 
-3. Run the Application
+2. Run the Application
     - Run the following commands in your terminal:
     ```
     cd src
