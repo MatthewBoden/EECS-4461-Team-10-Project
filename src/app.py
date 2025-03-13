@@ -12,6 +12,7 @@ from mesa.visualization import (
 )
 import solara
 
+# TODO: Add visual collision logic
 def portrayal(agent):
     if agent is None:
         return

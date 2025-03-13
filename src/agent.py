@@ -6,9 +6,6 @@ class VehicleAgent(mesa.experimental.cell_space.CellAgent):
         """
         Look around and see who my neighbors are
         """
-
-        # phenomenon will be: AI cars can detect if vehicle is AI (V2V), if it isnt (human) it will move away from it, expecting the human to be reckless
-        # if it is V2V, it wouldnt avoid it, both go straight line. Maybe if AI car is next to another AI car, they go straight line
         self.neighborhood = self.cell.get_neighborhood(radius=self.vision) 
 
         self.neighbors = self.neighborhood.agents
@@ -78,11 +75,14 @@ class AIVehicle(VehicleAgent):
         self.neighbors = []
         self.empty_neighbors = []
         self.is_middle = is_middle
+
+        # TODO: Dig deeper analytically into left and right coefficient
         self.left_sway_coefficient = left_sway_coefficient
         self.right_sway_coefficient = right_sway_coefficient
 
     def move(self):
-        # V2V Logic
+        # V2V Phenomenon
+        # TODO: Add malfunction rate
         if self.model.movement and self.empty_neighbors:
             for neighbor in self.neighbors:
                 cur_x = self.cell.coordinate[0]
