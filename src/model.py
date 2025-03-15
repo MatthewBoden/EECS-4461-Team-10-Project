@@ -49,7 +49,7 @@ class HighwayV2VModel(mesa.Model):
         )
 
         # Data Elements
-        self.steps = 0
+        self.step_count = 0
 
         self.human_count = 1
         self.ai_count = 1
@@ -101,7 +101,7 @@ class HighwayV2VModel(mesa.Model):
             # [Optional] Spawn of random agent type in far left column
             first_spawn_result = random.random() < 0.5
             if first_spawn_result:
-                if cell.coordinate == (0, 0) and cell.empty:
+                if cell.coordinate == (0, 0) and cell.is_empty:
                     result = random.random() < 0.5
                     if result:
                         ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
@@ -115,7 +115,7 @@ class HighwayV2VModel(mesa.Model):
             # [Optional] Spawn of random agent in far right column
             second_spawn_result = random.random() < 0.5
             if second_spawn_result:
-                if cell.coordinate == (6, 0) and cell.empty:
+                if cell.coordinate == (6, 0) and cell.is_empty:
                     result = random.random() < 0.5
                     if result:
                         ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
@@ -127,7 +127,7 @@ class HighwayV2VModel(mesa.Model):
                         self.human_count += 1
                 
             # [Mandatory] Spawn of random agent in middle column
-            if cell.coordinate == (3, 0) and cell.empty:
+            if cell.coordinate == (3, 0) and cell.is_empty:
                 result = random.random() < 0.5
                 if result:
                     ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=True, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
@@ -140,7 +140,7 @@ class HighwayV2VModel(mesa.Model):
                     self.human_count += 1
 
             # Removal of agents when they reach the end of the grid 
-            if (cell.coordinate[1] == self.height - 1) and cell.empty == False:
+            if (cell.coordinate[1] == self.height - 1) and cell.is_empty == False:
                 cell.remove_agent(cell.agents[0])
             
             # collision between two agents
@@ -184,10 +184,10 @@ class HighwayV2VModel(mesa.Model):
                         if agent.__class__ == HumanVehicle and agent.is_middle:
                             self.middle_human_time_in_polar_lanes += 1
 
-        self.steps += 1
+        self.step_count += 1
 
-        self.middle_ai_polar_rate = self.middle_ai_time_in_polar_lanes / self.steps
-        self.middle_human_polar_rate = self.middle_human_time_in_polar_lanes / self.steps
+        self.middle_ai_polar_rate = self.middle_ai_time_in_polar_lanes / self.step_count
+        self.middle_human_polar_rate = self.middle_human_time_in_polar_lanes / self.step_count
 
         self.datacollector.collect(self)
 
