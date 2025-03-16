@@ -64,6 +64,8 @@ class HighwayV2VModel(mesa.Model):
         self.middle_ai_polar_rate = 0
         self.middle_human_polar_rate = 0
 
+        self.collided_cells = set()
+
         model_reporters = {
             "AI-AI Collisions": lambda m: m.ai_ai_collisions,
             "Human-Human Collisions": lambda m: m.human_human_collisions,
@@ -94,6 +96,8 @@ class HighwayV2VModel(mesa.Model):
         Advance the model by one step and collect data.
         """
         self.agents.shuffle_do("step")
+
+        self.collided_cells.clear()
 
         for cell in self.grid.all_cells:
             # Next 3 blocks are for the dynamic spawning of agents, random # and random types per row
@@ -142,9 +146,12 @@ class HighwayV2VModel(mesa.Model):
             # Removal of agents when they reach the end of the grid 
             if (cell.coordinate[1] == self.height - 1) and cell.is_empty == False:
                 cell.remove_agent(cell.agents[0])
+                continue
             
             # collision between two agents
             if (len(cell.agents) == 2):
+                self.collided_cells.add(cell.coordinate)
+    
                 agent1 = cell.agents[0]
                 agent2 = cell.agents[1]
 
@@ -157,6 +164,8 @@ class HighwayV2VModel(mesa.Model):
                     
             # collision between three agents
             if len(cell.agents) == 3:
+                self.collided_cells.add(cell.coordinate)
+
                 agent1 = cell.agents[0]
                 agent2 = cell.agents[1]
                 agent3 = cell.agents[2]
@@ -188,7 +197,7 @@ class HighwayV2VModel(mesa.Model):
 
         self.middle_ai_polar_rate = self.middle_ai_time_in_polar_lanes / self.step_count
         self.middle_human_polar_rate = self.middle_human_time_in_polar_lanes / self.step_count
-
+        
         self.datacollector.collect(self)
 
         if self.steps > self.max_iters:
