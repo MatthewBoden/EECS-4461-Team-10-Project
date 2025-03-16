@@ -28,8 +28,6 @@ def portrayal(agent):
         portrayal["color"] = "#AA4A44"
     elif isinstance(agent, HumanVehicle):
         portrayal["color"] = "#808080"
-    
-    print(model.collided_cells)
 
     
     if coordinate in model.collided_cells:
@@ -42,17 +40,17 @@ def portrayal(agent):
         if has_ai and has_human:
             # AI-Human collision
             portrayal["marker"] = "*" # star shape
-            portrayal["color"] = "#FF0000" 
+            portrayal["color"] = "#FF0000" # red
             portrayal["size"] = 85
         elif has_ai and not has_human:
             # AI-AI collision
-            portrayal["marker"] = "p" # pentagon
-            portrayal["color"] = "#AA00AA"  
+            portrayal["marker"] = "*" 
+            portrayal["color"] = "#AA00AA" # purple
             portrayal["size"] = 85
         elif has_human and not has_ai:
             # Human-Human collision
-            portrayal["marker"] = "o" # circle
-            portrayal["color"] = "#FF9900" 
+            portrayal["marker"] = "*" 
+            portrayal["color"] = "#FF9900" # yellow
             portrayal["size"] = 85
             
 
