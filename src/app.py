@@ -148,6 +148,7 @@ model_params = {
         "value": 42,
         "label": "Random Seed",
     },
+    "ai_malfunction_rate": Slider("AI Malfunction Rate", 0, 0.0, 100, 1),
     "left_sway_coefficient": Slider("V2V Left Sway Coefficient", 0.5, 0.0, 1, 0.01),
     "right_sway_coefficient": Slider("V2V Right Sway Coefficient", 0.5, 0.0, 1, 0.01),
 }
