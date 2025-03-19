@@ -12,10 +12,12 @@ from mesa.visualization import (
 )
 import solara
 
-# TODO: Add visual collision logic
 def portrayal(agent):
     if agent is None:
         return
+
+    model = agent.model
+    coordinate = agent.cell.coordinate
 
     portrayal = { 
         "size": 75, 
@@ -27,7 +29,33 @@ def portrayal(agent):
     elif isinstance(agent, HumanVehicle):
         portrayal["color"] = "#808080"
 
+    
+    if coordinate in model.collided_cells:
+        cell = agent.cell
+        agents_in_cell = cell.agents
+        
+        has_ai = any(isinstance(a, AIVehicle) for a in agents_in_cell)
+        has_human = any(isinstance(a, HumanVehicle) for a in agents_in_cell)
+        
+        if has_ai and has_human:
+            # AI-Human collision
+            portrayal["marker"] = "*" # star shape
+            portrayal["color"] = "#FF0000" # red
+            portrayal["size"] = 85
+        elif has_ai and not has_human:
+            # AI-AI collision
+            portrayal["marker"] = "*" 
+            portrayal["color"] = "#AA00AA" # purple
+            portrayal["size"] = 85
+        elif has_human and not has_ai:
+            # Human-Human collision
+            portrayal["marker"] = "*" 
+            portrayal["color"] = "#FF9900" # yellow
+            portrayal["size"] = 85
+            
+
     return portrayal
+
 
 def post_process(ax):
     ax.set_aspect("equal")
