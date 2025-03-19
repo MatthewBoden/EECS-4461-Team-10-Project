@@ -31,6 +31,7 @@ class HighwayV2VModel(mesa.Model):
         movement=True,
         max_iters=10000,
         seed=None,
+        ai_malfunction_rate=0,
     ):
         super().__init__(seed=seed)
 
@@ -43,6 +44,7 @@ class HighwayV2VModel(mesa.Model):
         self.width = width
         self.left_sway_coefficient = left_sway_coefficient
         self.right_sway_coefficient = right_sway_coefficient
+        self.ai_malfunction_rate = ai_malfunction_rate
 
         self.grid = mesa.experimental.cell_space.OrthogonalMooreGrid(
             (width, height), capacity=10, torus=False, random=self.random
@@ -80,7 +82,7 @@ class HighwayV2VModel(mesa.Model):
         self.datacollector.collect(self)
 
         # need to create initial vehicles when initializing system
-        ai_vehicle = AIVehicle(self, vision=ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
+        ai_vehicle = AIVehicle(self, vision=ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient, ai_malfunction_rate=self.ai_malfunction_rate)
         human_vehicle = HumanVehicle(self, vision=human_vision, is_middle=True)
 
         for cell in self.grid.all_cells:
@@ -108,7 +110,7 @@ class HighwayV2VModel(mesa.Model):
                 if cell.coordinate == (0, 0) and cell.is_empty:
                     result = random.random() < 0.5
                     if result:
-                        ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
+                        ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient, ai_malfunction_rate=self.ai_malfunction_rate)
                         ai_vehicle.move_to(cell)
                         self.ai_count += 1
                     else:
@@ -122,7 +124,7 @@ class HighwayV2VModel(mesa.Model):
                 if cell.coordinate == (6, 0) and cell.is_empty:
                     result = random.random() < 0.5
                     if result:
-                        ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
+                        ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=False, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient, ai_malfunction_rate=self.ai_malfunction_rate)
                         ai_vehicle.move_to(cell)
                         self.ai_count += 1
                     else:
@@ -134,7 +136,7 @@ class HighwayV2VModel(mesa.Model):
             if cell.coordinate == (3, 0) and cell.is_empty:
                 result = random.random() < 0.5
                 if result:
-                    ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=True, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient)
+                    ai_vehicle = AIVehicle(self, vision=self.ai_vision, is_middle=True, left_sway_coefficient=self.left_sway_coefficient, right_sway_coefficient=self.right_sway_coefficient, ai_malfunction_rate=self.ai_malfunction_rate)
                     ai_vehicle.move_to(cell)
                     self.ai_count += 1
                     

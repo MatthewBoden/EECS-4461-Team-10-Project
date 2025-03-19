@@ -61,7 +61,7 @@ class AIVehicle(VehicleAgent):
         vision: number of cells in each direction that AI is able to inspect
     """
 
-    def __init__(self, model, vision, is_middle, left_sway_coefficient, right_sway_coefficient):
+    def __init__(self, model, vision, is_middle, left_sway_coefficient, right_sway_coefficient, ai_malfunction_rate):
         """
         Create a new AIVehicle.
         Args:
@@ -80,9 +80,27 @@ class AIVehicle(VehicleAgent):
         self.left_sway_coefficient = left_sway_coefficient
         self.right_sway_coefficient = right_sway_coefficient
 
+        self.ai_malfunction_rate = ai_malfunction_rate
+
     def move(self):
         # V2V Phenomenon
-        # TODO: Add malfunction rate
+
+        if self.model.movement and self.empty_neighbors:
+            if random.random() * 100 < self.ai_malfunction_rate:
+                # 90% chance of a random movement which may or may not lead to a collision
+                if random.random() < 0.9: 
+                    new_pos = random.choice(self.empty_neighbors)
+                # 10% chance to move aggressively which leads to almost a gurantee collision
+                else:
+                    if len(self.empty_neighbors) > 1:
+                        new_pos = self.empty_neighbors[-1]
+                    else:
+                        new_pos = self.empty_neighbors[0]
+                    
+                self.move_to(new_pos)
+                return
+
+
         if self.model.movement and self.empty_neighbors:
             for neighbor in self.neighbors:
                 cur_x = self.cell.coordinate[0]
