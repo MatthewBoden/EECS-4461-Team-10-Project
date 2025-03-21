@@ -76,7 +76,6 @@ class AIVehicle(VehicleAgent):
         self.empty_neighbors = []
         self.is_middle = is_middle
 
-        # TODO: Dig deeper analytically into left and right coefficient
         self.left_sway_coefficient = left_sway_coefficient
         self.right_sway_coefficient = right_sway_coefficient
 
