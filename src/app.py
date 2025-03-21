@@ -89,9 +89,9 @@ def space_filler_plot(ax):
 
 collision_chart = make_plot_component(
     {
-        "AI-AI Collisions": "#AA4A44",
-        "Human-Human Collisions": "#808080",
-        "AI-Human Collisions": "#000000"     
+        "AI-AI Collisions": "#AA00AA",
+        "Human-Human Collisions": "#FF9900",
+        "AI-Human Collisions": "#FF0000"     
     },
     post_process=customize_plot_1,
     backend="matplotlib"
