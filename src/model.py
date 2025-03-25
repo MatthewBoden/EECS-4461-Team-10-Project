@@ -202,13 +202,12 @@ class HighwayV2VModel(mesa.Model):
         
         self.datacollector.collect(self)
 
-
+        # Data exported for analysis
         if self.step_count == 100 or self.step_count == 1000 or self.step_count == 5000:
             print(f"AI-to-AI collision at {self.step_count}: ")
             print(self.ai_ai_collisions)
             print(f"Human-to-Human collision at {self.step_count}: ")
             print(self.human_human_collisions)
-
 
         if self.step_count == 10 or self.step_count == 100 or self.step_count == 1000:
             print(f"AI on side at {self.step_count}: ")
@@ -216,8 +215,5 @@ class HighwayV2VModel(mesa.Model):
             print(f"Human on side at {self.step_count}: ")
             print(self.middle_human_polar_rate) 
 
-
         if self.steps > self.max_iters:
             self.running = False
-
-
