@@ -16,7 +16,6 @@ class VehicleAgent(mesa.experimental.cell_space.CellAgent):
                 empty_neighbors.append(c)
         self.empty_neighbors = empty_neighbors
 
-
 class HumanVehicle(VehicleAgent):
     """
     A human driving a vehicle. Prone to error and poor decision making.
@@ -39,10 +38,15 @@ class HumanVehicle(VehicleAgent):
         self.neighbors = []
         self.empty_neighbors = []
         self.is_middle = is_middle
+        
+        # New attributes for collision detection
+        self.detected_potential_collision = False
+        self.avoided_collision = False
 
     def move(self):
         if self.model.movement and self.empty_neighbors:
             new_pos = self.random.choice(self.empty_neighbors)
+            self.model.successful_lane_changes += 1
             self.move_to(new_pos)
 
     def step(self):
@@ -50,8 +54,23 @@ class HumanVehicle(VehicleAgent):
         Update potential lane changes and move to one of them.
         """
         self.update_neighbors()
+        
+        # Detect potential collision
+        if self.detect_potential_collision():
+            self.detected_potential_collision = True
+            if self.can_avoid_collision():
+                self.avoided_collision = True
+        
         self.move()
 
+    def detect_potential_collision(self):
+        for neighbor in self.neighbors:
+            if isinstance(neighbor, VehicleAgent):
+                return True
+        return False
+
+    def can_avoid_collision(self):
+        return len(self.empty_neighbors) > 0
 
 class AIVehicle(VehicleAgent):
     """
@@ -80,6 +99,11 @@ class AIVehicle(VehicleAgent):
         self.right_sway_coefficient = right_sway_coefficient
 
         self.ai_malfunction_rate = ai_malfunction_rate
+        
+        # New attributes for collision detection
+        self.detected_potential_collision = False
+        self.avoided_collision = False
+        
 
     def move(self):
         # V2V Phenomenon
@@ -89,16 +113,17 @@ class AIVehicle(VehicleAgent):
                 # 90% chance of a random movement which may or may not lead to a collision
                 if random.random() < 0.9: 
                     new_pos = random.choice(self.empty_neighbors)
+                    #self.model.successful_lane_changes += 1
                 # 10% chance to move aggressively which leads to almost a gurantee collision
                 else:
                     if len(self.empty_neighbors) > 1:
                         new_pos = self.empty_neighbors[-1]
+                        #self.model.successful_lane_changes += 1
                     else:
                         new_pos = self.empty_neighbors[0]
                     
                 self.move_to(new_pos)
                 return
-
 
         if self.model.movement and self.empty_neighbors:
             for neighbor in self.neighbors:
@@ -111,6 +136,7 @@ class AIVehicle(VehicleAgent):
                         result = random.random() < self.left_sway_coefficient # the parameter to configure how often the V2V logic dictates to move left
                         if result:
                             new_pos = self.empty_neighbors[0] # change lanes to the left
+                            #self.model.successful_lane_changes += 1
                         elif len(self.empty_neighbors) == 2:
                             new_pos = self.empty_neighbors[0] # stay in same lane because no space to the left
                         else:
@@ -121,6 +147,7 @@ class AIVehicle(VehicleAgent):
                         result = random.random() < self.right_sway_coefficient # the parameter to configure how often the V2V logic dictates to move right
                         if result and len(self.empty_neighbors) == 3:
                             new_pos = self.empty_neighbors[2] # change lanes to the right if not on edge
+                            #self.model.successful_lane_changes += 1
                         else:
                             new_pos = self.empty_neighbors[1] # stay in the same lane
                         self.move_to(new_pos)
@@ -134,4 +161,23 @@ class AIVehicle(VehicleAgent):
         Update potential lane changes using V2V and move to one of them.
         """
         self.update_neighbors()
+        
+        # Detect potential collision
+        if self.detect_potential_collision():
+            self.detected_potential_collision = True
+            if self.can_avoid_collision():
+                self.avoided_collision = True
+
+        if self.detect_potential_collision():
+            self.detected_potential_collision = True        
+        
         self.move()
+
+    def detect_potential_collision(self):
+        for neighbor in self.neighbors:
+            if isinstance(neighbor, VehicleAgent):
+                return True
+        return False
+
+    def can_avoid_collision(self):
+        return len(self.empty_neighbors) > 0

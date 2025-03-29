@@ -66,7 +66,15 @@ class HighwayV2VModel(mesa.Model):
         self.middle_ai_polar_rate = 0
         self.middle_human_polar_rate = 0
 
+        self.potential_collisions_detected = 0
+        self.potential_collisions_avoided = 0
+
         self.collided_cells = set()
+
+        self.failed_lane_changes = 0
+        self.successful_lane_changes = 0
+        self.potential_collisions_avoided = 0
+        self.potential_collisions_detected = 0
 
         model_reporters = {
             "AI-AI Collisions": lambda m: m.ai_ai_collisions,
@@ -75,7 +83,13 @@ class HighwayV2VModel(mesa.Model):
             "AI Agents": lambda m: m.ai_count,
             "Human Agents": lambda m: m.human_count,
             "AI Agents in Polar Lanes": lambda m: m.middle_ai_polar_rate,
-            "Human Agents in Polar Lanes": lambda m: m.middle_human_polar_rate
+            "Human Agents in Polar Lanes": lambda m: m.middle_human_polar_rate,
+
+            # V2V Metrics
+            "Failed Lane Changes": lambda m: m.failed_lane_changes,
+            "Successful Lane Changes": lambda m: m.successful_lane_changes,
+            "Potential Collisions Avoided": lambda m: m.potential_collisions_avoided,
+            "Potential Collisions Detected": lambda m: m.potential_collisions_detected,
         }
 
         self.datacollector = mesa.DataCollector(model_reporters=model_reporters)
@@ -100,6 +114,7 @@ class HighwayV2VModel(mesa.Model):
         self.agents.shuffle_do("step")
 
         self.collided_cells.clear()
+
 
         for cell in self.grid.all_cells:
             # Next 3 blocks are for the dynamic spawning of agents, random # and random types per row
@@ -153,6 +168,7 @@ class HighwayV2VModel(mesa.Model):
             # collision between two agents
             if (len(cell.agents) == 2):
                 self.collided_cells.add(cell.coordinate)
+                self.failed_lane_changes += 1
     
                 agent1 = cell.agents[0]
                 agent2 = cell.agents[1]
@@ -167,6 +183,7 @@ class HighwayV2VModel(mesa.Model):
             # collision between three agents
             if len(cell.agents) == 3:
                 self.collided_cells.add(cell.coordinate)
+                self.failed_lane_changes += 2
 
                 agent1 = cell.agents[0]
                 agent2 = cell.agents[1]
@@ -194,6 +211,14 @@ class HighwayV2VModel(mesa.Model):
                             self.middle_ai_time_in_polar_lanes += 1
                         if agent.__class__ == HumanVehicle and agent.is_middle:
                             self.middle_human_time_in_polar_lanes += 1
+            
+            for agent in cell.agents:
+                if hasattr(agent, 'detected_potential_collision') and agent.detected_potential_collision:
+                    self.potential_collisions_detected += 1
+                    #print("Potential collision detected")
+                    if agent.avoided_collision:
+                        self.potential_collisions_avoided += 1
+
 
         self.step_count += 1
 

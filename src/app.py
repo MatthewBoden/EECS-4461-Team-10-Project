@@ -84,6 +84,15 @@ def customize_plot_3(ax):
     ax.legend(loc="upper left")
     ax.get_figure().set_size_inches(8, 4)
 
+
+def customize_plot_4(ax):
+    ax.set_title("Lane Change Success Rate Over Time")
+    ax.set_xlabel("Steps")
+    ax.set_ylabel("Number of Lane Changes")
+    ax.legend(loc="upper left")
+    ax.get_figure().set_size_inches(8, 4)    
+
+
 def space_filler_plot(ax):
     ax.get_figure().set_visible(False)
 
@@ -103,6 +112,16 @@ polar_lane_average = make_plot_component(
         "Human Agents in Polar Lanes": "#808080",
     },
     post_process=customize_plot_2,
+    backend="matplotlib"
+)
+
+success_lane_chart = make_plot_component(
+    {
+        "Potential Collisions Avoided": "#5B9BD5",
+        "Successful Lane Changes": "#27AE60",
+        "Failed Lane Changes": "#E74C3C",
+    },
+    post_process=customize_plot_4,
     backend="matplotlib"
 )
 
@@ -164,6 +183,15 @@ def agent_counter(model):
                     "text-align": "center",
                     "font-weight": "bold"
                 })
+            
+            # with solara.Card("Potential Avoided/Detected Collisions", style={"background": "#5B9BD5", "color": "white", "min-width": "150px", "padding": "15px", "text-align": "center"}):
+            #     solara.Text(str(model.potential_collisions_avoided), style={"font-size": "32px", "text-align": "center", "font-weight": "bold"})
+            
+            # with solara.Card("Successful Lane Changes", style={"background": "#E74C3C", "color": "white", "min-width": "150px", "padding": "15px", "text-align": "center"}):
+            #     solara.Text(str(model.successful_lane_changes), style={"font-size": "32px", "text-align": "center", "font-weight": "bold"})
+
+            # with solara.Card("Failed Lane Changes", style={"background": "#E74C3C", "color": "white", "min-width": "150px", "padding": "15px", "text-align": "center"}):
+            #     solara.Text(str(model.failed_lane_changes), style={"font-size": "32px", "text-align": "center", "font-weight": "bold"})
 
 space_fill = make_plot_component(
     {},
@@ -195,7 +223,9 @@ page = SolaraViz(
         space_fill,
         polar_lane_average,
         space_fill,
-        collision_chart
+        collision_chart,
+        space_fill,
+        success_lane_chart
     ],
     model_params=model_params,
     name="Highway V2V Model",
